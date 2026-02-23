@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Engineering Timeline — From Wheel to AI</title>
+
+    <!-- Three.js Import Map -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+    <meta name="description"
+        content="An interactive cinematic journey through engineering history — from the first wheel to artificial intelligence.">
+
+    <!-- Tailwind CSS v3 CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'electric': '#2563EB',
+                        'electric-glow': '#3B82F6',
+                    },
+                    fontFamily: {
+                        'inter': ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: #000000;
+            color: #ffffff;
+            font-family: 'Inter', system-ui, sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #000;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #2563EB;
+            border-radius: 2px;
+        }
+
+        /* Navbar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            background: rgba(0, 0, 0, 0.4);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: background 0.3s ease;
+        }
+
+        .navbar.scrolled {
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        .nav-link {
+            position: relative;
+            color: rgba(255, 255, 255, 0.6);
+            transition: color 0.3s ease;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: #ffffff;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: #2563EB;
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after,
+        .nav-link.active::after {
+            width: 100%;
+        }
+
+        .pill-btn {
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 9999px;
+            padding: 0.5rem 1.5rem;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            color: #ffffff;
+            background: transparent;
+            transition: all 0.3s ease;
+            letter-spacing: 0.03em;
+            cursor: pointer;
+        }
+
+        .pill-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Hero CTA */
+        .cta-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: #2563EB;
+            color: #fff;
+            padding: 1rem 2.25rem;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.9375rem;
+            letter-spacing: 0.02em;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            border: none;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, transparent 50%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .cta-btn:hover {
+            background: #3B82F6;
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(37, 99, 235, 0.4);
+        }
+
+        .cta-btn:hover::before {
+            opacity: 1;
+        }
+
+        .cta-btn svg {
+            transition: transform 0.3s ease;
+        }
+
+        .cta-btn:hover svg {
+            transform: translateX(4px);
+        }
+
+        /* Frame animation container */
+        .frame-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .frame-container canvas {
+            max-width: 100%;
+            max-height: 80vh;
+            object-fit: contain;
+        }
+
+        /* Floating animation for static images */
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px) scale(1);
+            }
+
+            50% {
+                transform: translateY(-20px) scale(1.02);
+            }
+        }
+
+        .float-anim {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        /* Year background label */
+        .year-label {
+            position: absolute;
+            font-size: clamp(6rem, 15vw, 16rem);
+            font-weight: 900;
+            color: rgba(255, 255, 255, 0.03);
+            line-height: 1;
+            user-select: none;
+            pointer-events: none;
+            z-index: 0;
+            top: 50%;
+            left: 5%;
+            transform: translateY(-50%);
+        }
+
+        /* Section reveal animations */
+        .reveal {
+            opacity: 0;
+            transform: translateY(60px);
+            transition: all 1s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .reveal-delay-1 {
+            transition-delay: 0.15s;
+        }
+
+        .reveal-delay-2 {
+            transition-delay: 0.3s;
+        }
+
+        .reveal-delay-3 {
+            transition-delay: 0.45s;
+        }
+
+        /* Scroll progress indicator */
+        .scroll-indicator {
+            position: fixed;
+            right: 2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 90;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.25rem;
+        }
+
+        .scroll-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            transition: all 0.4s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .scroll-dot.active {
+            background: #2563EB;
+            box-shadow: 0 0 12px rgba(37, 99, 235, 0.6), 0 0 24px rgba(37, 99, 235, 0.3);
+            transform: scale(1.4);
+        }
+
+        .scroll-dot::before {
+            content: attr(data-label);
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            white-space: nowrap;
+            font-size: 0.6875rem;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0);
+            transition: all 0.3s ease;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            pointer-events: none;
+        }
+
+        .scroll-dot:hover::before,
+        .scroll-dot.active::before {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Connector line between dots */
+        .scroll-line {
+            width: 1px;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        /* Subtle glow around images */
+        .glow-wrap {
+            position: relative;
+        }
+
+        .glow-wrap::after {
+            content: '';
+            position: absolute;
+            inset: -20%;
+            background: radial-gradient(circle at center, rgba(37, 99, 235, 0.06) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Era section */
+        .era-section {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* Loading spinner for frames */
+        .frame-loader {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-top-color: #2563EB;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
+        }
+
+        /* Hero image frame */
+        .hero-frame-img {
+            max-width: 100%;
+            max-height: 75vh;
+            object-fit: contain;
+            border-radius: 2px;
+        }
+
+        /* Parallax subtle depth */
+        .parallax-layer {
+            will-change: transform;
+            transition: transform 0.1s linear;
+        }
+
+        /* Mobile scroll indicator hide */
+        @media (max-width: 768px) {
+            .scroll-indicator {
+                display: none;
+            }
+
+            .year-label {
+                font-size: 4rem;
+                top: 10%;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+        }
+
+        /* Smooth image rendering */
+        canvas {
+            image-rendering: auto;
+        }
+
+        /* Subtle noise texture overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.02'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.4;
+        }
+
+        /* Three.js fixed canvas container */
+        #three-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        #three-container canvas {
+            display: block;
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        /* Ensure all page content sits above the 3D canvas */
+        .navbar {
+            z-index: 100;
+        }
+
+        .scroll-indicator {
+            z-index: 90;
+        }
+
+        .era-section {
+            position: relative;
+            z-index: 2;
+        }
+
+        footer {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* 3D visual placeholder — transparent container */
+        .three-visual-slot {
+            position: relative;
+            width: 100%;
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @media (max-width: 768px) {
+            .three-visual-slot {
+                min-height: 300px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Three.js Fixed Canvas Container -->
+    <div id="three-container"></div>
+
+    <!-- ============================================ -->
+    <!-- NAVBAR -->
+    <!-- ============================================ -->
+    <nav class="navbar" id="navbar">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8 h-16 flex items-center justify-between">
+            <!-- Title -->
+            <a href="#hero" class="text-white font-bold text-lg tracking-tight">
+                Engineering <span class="text-electric font-light">Timeline</span>
+            </a>
+
+            <!-- Center nav links (hidden on mobile) -->
+            <div class="hidden md:flex items-center gap-8">
+                <a href="#wheel" class="nav-link" data-section="wheel">Wheel</a>
+                <a href="#steam" class="nav-link" data-section="steam">Steam Engine</a>
+                <a href="#electricity" class="nav-link" data-section="electricity">Electricity</a>
+                <a href="#internet" class="nav-link" data-section="internet">Internet</a>
+                <a href="#ai" class="nav-link" data-section="ai">AI</a>
+            </div>
+
+            <!-- Pill button -->
+            <a href="#wheel" class="pill-btn hidden sm:inline-block">Explore Timeline</a>
+
+            <!-- Mobile menu button -->
+            <button class="md:hidden text-white" id="mobileMenuBtn" aria-label="Open navigation menu">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Mobile dropdown -->
+        <div class="md:hidden hidden bg-black/95 backdrop-blur-xl border-t border-white/5" id="mobileMenu">
+            <div class="px-6 py-4 flex flex-col gap-4">
+                <a href="#wheel" class="nav-link text-sm">Wheel</a>
+                <a href="#steam" class="nav-link text-sm">Steam Engine</a>
+                <a href="#electricity" class="nav-link text-sm">Electricity</a>
+                <a href="#internet" class="nav-link text-sm">Internet</a>
+                <a href="#ai" class="nav-link text-sm">AI</a>
+                <a href="#wheel" class="pill-btn text-center text-sm mt-2">Explore Timeline</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ============================================ -->
+    <!-- SCROLL PROGRESS INDICATOR -->
+    <!-- ============================================ -->
+    <div class="scroll-indicator" id="scrollIndicator">
+        <div class="scroll-dot active" data-target="hero" data-label="Home" onclick="scrollToSection('hero')"></div>
+        <div class="scroll-line"></div>
+        <div class="scroll-dot" data-target="wheel" data-label="Wheel" onclick="scrollToSection('wheel')"></div>
+        <div class="scroll-line"></div>
+        <div class="scroll-dot" data-target="steam" data-label="Steam" onclick="scrollToSection('steam')"></div>
+        <div class="scroll-line"></div>
+        <div class="scroll-dot" data-target="electricity" data-label="Electricity"
+            onclick="scrollToSection('electricity')"></div>
+        <div class="scroll-line"></div>
+        <div class="scroll-dot" data-target="internet" data-label="Internet" onclick="scrollToSection('internet')">
+        </div>
+        <div class="scroll-line"></div>
+        <div class="scroll-dot" data-target="ai" data-label="AI" onclick="scrollToSection('ai')"></div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- HERO SECTION -->
+    <!-- ============================================ -->
+    <section id="hero" class="era-section pt-16">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8 w-full">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center min-h-[calc(100vh-4rem)]">
+                <!-- Left: Text -->
+                <div class="order-2 lg:order-1 text-center lg:text-left">
+                    <p class="text-electric text-xs font-semibold tracking-[0.2em] uppercase mb-6 reveal">Engineering
+                        Through the Ages</p>
+                    <h1
+                        class="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold leading-[1.08] tracking-tight mb-8 reveal reveal-delay-1">
+                        From the First Wheel<br>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">to
+                            Artificial</span><br>
+                        <span
+                            class="text-transparent bg-clip-text bg-gradient-to-r from-electric to-electric-glow">Intelligence</span>
+                    </h1>
+                    <p
+                        class="text-gray-400 text-base lg:text-lg leading-relaxed max-w-xl mx-auto lg:mx-0 mb-10 reveal reveal-delay-2">
+                        Engineering innovation has evolved from simple mechanical systems to complex digital networks
+                        and modern AI systems that are shaping the future. Explore the pivotal breakthroughs that
+                        defined each era of human progress.
+                    </p>
+                    <div class="reveal reveal-delay-3">
+                        <a href="#wheel" class="cta-btn">
+                            Start the Journey
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M5 12h14M12 5l7 7-7 7" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Right: 3D Visual Slot (Hero) -->
+                <div class="order-1 lg:order-2 flex items-center justify-center glow-wrap">
+                    <div class="three-visual-slot" id="heroVisualSlot"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================ -->
+    <!-- ERA 1: THE WHEEL -->
+    <!-- ============================================ -->
+    <section id="wheel" class="era-section" data-era="wheel">
+        <div class="year-label">~3500 BC</div>
+        <div class="max-w-7xl mx-auto px-6 lg:px-8 w-full relative z-10">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+                <!-- Left: Text -->
+                <div class="order-2 lg:order-1 text-center lg:text-left">
+                    <p class="text-electric text-xs font-semibold tracking-[0.2em] uppercase mb-4 reveal">~3500 BC •
+                        Mesopotamia</p>
+                    <h2
+                        class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight mb-6 reveal reveal-delay-1">
+                        The Wheel</h2>
+                    <p
+                        class="text-gray-400 text-base lg:text-lg leading-relaxed max-w-lg mx-auto lg:mx-0 reveal reveal-delay-2">
+                        The invention of the wheel marked humanity's first great mechanical breakthrough.
+                        Originally used for pottery, it was soon adapted for transportation, fundamentally
+                        transforming trade, agriculture, and warfare. This simple circular innovation became
+                        the foundation upon which all mechanical engineering would be built.
+                    </p>
+                </div>
+
+                <!-- Right: 3D Visual Slot (Wheel) -->
+                <div class="order-1 lg:order-2 flex items-center justify-center glow-wrap">
+                    <div class="three-visual-slot" data-era="wheel"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================ -->
+    <!-- ERA 2: THE STEAM ENGINE -->
+    <!-- ============================================ -->
+    <section id="steam" class="era-section" data-era="steam">
+        <div class="year-label">1712</div>
+        <div class="max-w-7xl mx-auto px-6 lg:px-8 w-full relative z-10">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+                <div class="order-2 lg:order-1 text-center lg:text-left">
+                    <p class="text-electric text-xs font-semibold tracking-[0.2em] uppercase mb-4 reveal">1712 •
+                        Industrial Revolution</p>
+                    <h2
+                        class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight mb-6 reveal reveal-delay-1">
+                        The Steam Engine</h2>
+                    <p
+                        class="text-gray-400 text-base lg:text-lg leading-relaxed max-w-lg mx-auto lg:mx-0 reveal reveal-delay-2">
+                        Thomas Newcomen's atmospheric engine ignited the Industrial Revolution.
+                        Later perfected by James Watt, the steam engine converted thermal energy into
+                        mechanical work at unprecedented scale — powering factories, locomotives, and
+                        steamships. It transformed civilization from agrarian societies into industrial
+                        powerhouses.
+                    </p>
+                </div>
+                <div class="order-1 lg:order-2 flex items-center justify-center glow-wrap">
+                    <div class="three-visual-slot" data-era="steam"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================ -->
+    <!-- ERA 3: ELECTRICITY -->
+    <!-- ============================================ -->
+    <section id="electricity" class="era-section" data-era="electricity">
+        <div class="year-label">1879</div>
+        <div class="max-w-7xl mx-auto px-6 lg:px-8 w-full relative z-10">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+                <div class="order-2 lg:order-1 text-center lg:text-left">
+                    <p class="text-electric text-xs font-semibold tracking-[0.2em] uppercase mb-4 reveal">1879 • The Age
+                        of Light</p>
+                    <h2
+                        class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight mb-6 reveal reveal-delay-1">
+                        Electricity</h2>
+                    <p
+                        class="text-gray-400 text-base lg:text-lg leading-relaxed max-w-lg mx-auto lg:mx-0 reveal reveal-delay-2">
+                        Edison's practical incandescent lamp and Tesla's alternating current system
+                        electrified the modern world. Electricity became the universal energy carrier —
+                        powering communication, manufacturing, medicine, and every aspect of daily life.
+                        It laid the invisible infrastructure upon which all future digital technologies
+                        would depend.
+                    </p>
+                </div>
+                <div class="order-1 lg:order-2 flex items-center justify-center glow-wrap">
+                    <div class="three-visual-slot" data-era="electricity"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================ -->
+    <!-- ERA 4: THE INTERNET -->
+    <!-- ============================================ -->
+    <section id="internet" class="era-section" data-era="internet">
+        <div class="year-label">1969</div>
+        <div class="max-w-7xl mx-auto px-6 lg:px-8 w-full relative z-10">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+                <div class="order-2 lg:order-1 text-center lg:text-left">
+                    <p class="text-electric text-xs font-semibold tracking-[0.2em] uppercase mb-4 reveal">1969 • The
+                        Connected World</p>
+                    <h2
+                        class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight mb-6 reveal reveal-delay-1">
+                        The Internet</h2>
+                    <p
+                        class="text-gray-400 text-base lg:text-lg leading-relaxed max-w-lg mx-auto lg:mx-0 reveal reveal-delay-2">
+                        ARPANET's first message between UCLA and Stanford marked the birth of the
+                        Internet. What began as a military communications project evolved into the
+                        World Wide Web — connecting billions of people, democratizing information,
+                        and creating an entirely new digital economy. The Internet is the most
+                        transformative communication infrastructure ever built.
+                    </p>
+                </div>
+                <div class="order-1 lg:order-2 flex items-center justify-center glow-wrap">
+                    <div class="three-visual-slot" data-era="internet"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================ -->
+    <!-- ERA 5: ARTIFICIAL INTELLIGENCE -->
+    <!-- ============================================ -->
+    <section id="ai" class="era-section" data-era="ai">
+        <div class="year-label">2012</div>
+        <div class="max-w-7xl mx-auto px-6 lg:px-8 w-full relative z-10">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+                <div class="order-2 lg:order-1 text-center lg:text-left">
+                    <p class="text-electric text-xs font-semibold tracking-[0.2em] uppercase mb-4 reveal">2012 • The Age
+                        of Intelligence</p>
+                    <h2
+                        class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight mb-6 reveal reveal-delay-1">
+                        Artificial Intelligence</h2>
+                    <p
+                        class="text-gray-400 text-base lg:text-lg leading-relaxed max-w-lg mx-auto lg:mx-0 reveal reveal-delay-2">
+                        Deep learning's breakthrough in image recognition sparked the modern AI
+                        revolution. Neural networks now drive autonomous vehicles, generate human-like
+                        text, discover new drugs, and solve scientific problems once thought impossible.
+                        AI represents the culmination of every prior engineering era — mechanical,
+                        electrical, and digital — converging into machines that learn and reason.
+                    </p>
+                </div>
+                <div class="order-1 lg:order-2 flex items-center justify-center glow-wrap">
+                    <div class="three-visual-slot" data-era="ai"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================ -->
+    <!-- FOOTER -->
+    <!-- ============================================ -->
+    <footer class="border-t border-white/5 py-12">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8 text-center">
+            <p class="text-gray-600 text-sm font-light tracking-wide">
+                Engineering Timeline — From Wheel to AI &copy; 2026
+            </p>
+        </div>
+    </footer>
+
+    <!-- ============================================ -->
+    <!-- JAVASCRIPT -->
+    <!-- ============================================ -->
+    <!-- GSAP + ScrollTrigger -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+
+    <!-- Inline UI scripts (navbar, reveal, scroll dots) -->
+    <script>
+        // ==========================================
+        // MOBILE MENU TOGGLE
+        // ==========================================
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        mobileMenu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+            });
+        });
+
+        // ==========================================
+        // NAVBAR SCROLL BEHAVIOR
+        // ==========================================
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // ==========================================
+        // SCROLL TO SECTION
+        // ==========================================
+        function scrollToSection(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // ==========================================
+        // INTERSECTION OBSERVER — REVEAL ANIMATIONS
+        // ==========================================
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.15 });
+
+        document.querySelectorAll('.reveal').forEach(el => {
+            revealObserver.observe(el);
+        });
+
+        // ==========================================
+        // SCROLL PROGRESS INDICATOR
+        // ==========================================
+        const sections = ['hero', 'wheel', 'steam', 'electricity', 'internet', 'ai'];
+        const scrollDots = document.querySelectorAll('.scroll-dot');
+        const navLinks = document.querySelectorAll('.nav-link[data-section]');
+
+        function updateScrollIndicator() {
+            const scrollPos = window.scrollY + window.innerHeight / 2;
+            let activeIdx = 0;
+
+            sections.forEach((id, idx) => {
+                const section = document.getElementById(id);
+                if (section && scrollPos >= section.offsetTop) {
+                    activeIdx = idx;
+                }
+            });
+
+            scrollDots.forEach((dot, idx) => {
+                dot.classList.toggle('active', idx === activeIdx);
+            });
+
+            navLinks.forEach(link => {
+                const sectionId = link.getAttribute('data-section');
+                link.classList.toggle('active', sectionId === sections[activeIdx]);
+            });
+        }
+
+        window.addEventListener('scroll', updateScrollIndicator, { passive: true });
+        updateScrollIndicator();
+    </script>
+
+    <!-- Three.js 3D System -->
+    <script type="module" src="js/main.js"></script>
+</body>
+
+</html>
